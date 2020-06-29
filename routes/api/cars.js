@@ -119,6 +119,7 @@ router.put('/:card_id', function(req, res){
 
 });
 
+
 ////--------------------- punto 3 ---------------------
 
 router.get('/meli/:item_id', function(req, res){
@@ -145,6 +146,32 @@ router.get('/meli/:item_id', function(req, res){
 });
 
 ////--------------------- punto 4 ---------------------
+
+router.put('/meli/:item_id', function(req, res){
+    const { item_id } = req.params;
+    const { body: car } = req; 
+    
+    request({
+        url: `${url4}/${id_interno}/`, //URL to hit
+        // qs: {from: 'example', time: +new Date()}, //Query string data
+        method: 'PUT', // specify the request type
+        headers: { // speciyfy the headers
+            'Content-Type': 'application/json',
+        },
+        body: car //Set the body as a string
+        }, function(error, response, body){
+
+            // const data = JSON.parse(JSON.stringify(body.body));
+
+            if(error) {
+                console.log(error);
+            } else {
+                console.log(response.statusCode, body);
+            }
+        }
+);
+
+});
 
 /// Helpers
 
