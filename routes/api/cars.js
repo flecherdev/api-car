@@ -43,10 +43,10 @@ router.get('/:car_id', function(req, res){
 
 });
 
-////--------------------- punto 5 ---------------------
+////--------------------- punto 2 --------------------- (punto de entrada para los demas endpoint)
 
 // actualizar codigo segun si existe
-router.put('ambos/:car_id', function(req, res){
+router.put('/:car_id', function(req, res){
 
     const { car_id } = req.params; 
     const { body: car } = req; // datos a actualizar
@@ -80,17 +80,70 @@ router.put('ambos/:car_id', function(req, res){
                     body: JSON.stringify(car)
                     }, function(error, body){
                         // manejo el error de actualizacion de la data
-                        const data = JSON.parse(body.body);
-                        console.log(`primer data service put: ${JSON.stringify(data)}`)
+                        const dataUpdate = JSON.parse(body.body);
+                        console.log(`primer data service put: ${JSON.stringify(dataUpdate.data)}`)
 
-                        if(!data.Error_msg) {
+                        if(!dataUpdate.Error_msg) {
                             // si no se producjo ningun error pasa al endpoint 3 para actuallizar meli
-                            
+                            // TODO
+                            // consigo la data con url 3 
+                            request( `http://localhost:3000/api/cars/meli/${data.data.mlid}/`, function(err, body){
 
-                            res.status(200).json({
-                                data: data,
-                                message: 'ok'
+                                const dataGetMeli = JSON.parse(body.body);
+                                console.log(`segundo data service get meli: ${JSON.stringify(dataGetMeli.data)}`)
+
+                                // una vez que consigo el seller_id y status
+                                if(!dataGetMeli.Error_msg && dataGetMeli.data.status === 'active') {
+
+                                    let objetTemp = {
+                                        id_interno: 1000045453,
+                                        seller_id: dataGetMeli.data.seller_id,
+                                        precio: car.precio,
+                                        kilometros: car.kilometros
+                                    }
+
+                                    console.log(objetTemp)
+                                    request({
+                                        url: `http://localhost:3000/api/cars/meli/${data.data.mlid}/`, 
+                                        method: 'PUT', 
+                                        headers: { 
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify(objetTemp)
+                                        }, function(error, body){
+                                
+                                            const data = JSON.parse(body.body);
+                                            console.log(`segundo data service put meli: ${JSON.stringify(data)}`)
+                                
+                                            if(!data.Error_msg) {
+                                                res.status(200).json({
+                                                    data: data,
+                                                    message: 'ok'
+                                                });
+                                            } else {
+                                                res.status(200).json({
+                                                    data: data,
+                                                    message: 'error'
+                                                });
+                                            }
+                                
+                                        }
+                                    );
+
+                                    
+                                } else {
+                                    res.status(200).json({
+                                        data: dataGetMeli,
+                                        message: 'error'
+                                    });
+                                }
+                        
                             });
+
+                            // res.status(200).json({
+                            //     data: data,
+                            //     message: 'ok'
+                            // });
                         } else {
                             res.status(200).json({
                                 data: data,
@@ -107,19 +160,19 @@ router.put('ambos/:car_id', function(req, res){
 
 });
 
-router.put('/:car_id', function(req, res){
+// router.put('/:car_id', function(req, res){
 
-});
+// });
 
 ////--------------------- punto 3 ---------------------
 
 router.get('/meli/:item_id', function(req, res){
     const { item_id } = req.params;
 
-
-    request( `${url3}/${item_id} `, function(err, body){
+    request( `${url3}${item_id} `, function(err, body){
 
         const data = JSON.parse(body.body);
+        console.log(`primer data service get meli: ${JSON.stringify(data)}`)
 
         if(data) {
             res.status(200).json({
@@ -144,23 +197,25 @@ router.put('/meli/:item_id', function(req, res){
     const { body: car } = req; 
     
     request({
-        url: `${url4}/${id_interno}/`, 
+        url: `${url4}${id_interno}/`, 
         method: 'PUT', 
         headers: { 
             'Content-Type': 'application/json',
         },
-        body: JSON.parse(car)
+        body: JSON.stringify(car)
         }, function(error, body){
 
             const data = JSON.parse(body.body);
-            if(data) {
+            console.log(`primer data service put meli: ${JSON.stringify(data)}`)
+
+            if(!data.Error_msg) {
                 res.status(200).json({
-                    data: JSON.parse(data),
+                    data: data,
                     message: 'ok'
                 });
             } else {
                 res.status(200).json({
-                    data: JSON.parse(data),
+                    data: data,
                     message: 'error'
                 });
             }
