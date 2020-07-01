@@ -18,6 +18,8 @@ let url4 = 'https://al3xcr91.pythonanywhere.com/test/api/v1/meli/'
 ////--------------------- punto 1 ---------------------
 // 17491, 17492 y 17493
 // verifico que el car_id exista en ERP OK
+var jwt_clave="clave_secreta";
+
 router.get('/:car_id', function(req, res){
     
     const { car_id } = req.params;
@@ -113,7 +115,7 @@ router.put('/:car_id', function(req, res){
                                         },
                                         auth: {
                                             'bearer': 'bearerToken',
-                                            'id_interno':jwt.sign(dataGetMeli.data.seller_id) // esto puede ser token y no id_interno
+                                            'token':jwt.sign({ id_interno: dataGetMeli.data.seller_id } , jwt_clave) // esto puede ser id_interno
                                         },
                                         body: JSON.stringify(objetTemp)
                                         }, function(error, body){
