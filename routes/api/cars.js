@@ -2,6 +2,9 @@ var express = require('express');
 var router = express.Router();
 var request = require('request');
 const { json } = require('body-parser');
+var jwt = require('jsonwebtoken');
+var expressJwt = require('express-jwt');
+
 
 // para consumir otra api neseito instalar request
 // npm install request 
@@ -96,18 +99,21 @@ router.put('/:car_id', function(req, res){
                                 if(!dataGetMeli.Error_msg && dataGetMeli.data.status === 'active') {
 
                                     let objetTemp = {
-                                        id_interno: 1000045453,
                                         seller_id: dataGetMeli.data.seller_id,
                                         precio: car.precio,
                                         kilometros: car.kilometros
                                     }
-
+                                    // actualizacion en meli
                                     console.log(objetTemp)
                                     request({
                                         url: `http://localhost:3000/api/cars/meli/${data.data.mlid}/`, 
                                         method: 'PUT', 
                                         headers: { 
                                             'Content-Type': 'application/json',
+                                        },
+                                        auth: {
+                                            'bearer': 'bearerToken',
+                                            'id_interno':jwt.sign(dataGetMeli.data.seller_id) // esto puede ser token y no id_interno
                                         },
                                         body: JSON.stringify(objetTemp)
                                         }, function(error, body){
@@ -219,10 +225,8 @@ router.put('/meli/:item_id', function(req, res){
                     message: 'error'
                 });
             }
-
         }
     );
-
 });
 
 module.exports = router;
